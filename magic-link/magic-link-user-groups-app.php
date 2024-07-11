@@ -1,12 +1,13 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
+if ( !defined( 'ABSPATH' ) ) {
     exit;
 } // Exit if accessed directly.
 
 /**
  * Class Disciple_Tools_Magic_Links_Magic_User_Groups_App
  */
-class Disciple_Tools_Magic_Links_Magic_User_Groups_App extends Disciple_Tools_Magic_Links_Magic_User_Posts_Base {
+class Disciple_Tools_Magic_Links_Magic_User_Groups_App extends Disciple_Tools_Magic_Links_Magic_User_Posts_Base
+{
 
     public $page_title = 'User Group Updates';
     public $page_description = 'An update summary of assigned groups.';

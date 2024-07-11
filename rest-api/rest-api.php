@@ -1,5 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
+if ( !defined( 'ABSPATH' ) ) {
     exit;
 } // Exit if accessed directly.
 
@@ -23,7 +23,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
         $namespace = 'disciple_tools_magic_links/v1';
 
         register_rest_route(
-            $namespace, '/setup_payload', [
+            $namespace,
+            '/setup_payload',
+            [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [ $this, 'setup_payload' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -32,7 +34,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/get_post_record', [
+            $namespace,
+            '/get_post_record',
+            [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [ $this, 'get_post_record' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -41,7 +45,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/user_links_manage', [
+            $namespace,
+            '/user_links_manage',
+            [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [ $this, 'user_links_manage' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -50,7 +56,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/assigned_manage', [
+            $namespace,
+            '/assigned_manage',
+            [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [ $this, 'assigned_manage' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -59,7 +67,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/send_now', [
+            $namespace,
+            '/send_now',
+            [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [ $this, 'send_now' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -68,7 +78,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/next_scheduled_run', [
+            $namespace,
+            '/next_scheduled_run',
+            [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [ $this, 'next_scheduled_run' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -77,7 +89,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/report', [
+            $namespace,
+            '/report',
+            [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [ $this, 'get_report' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -86,7 +100,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/references', [
+            $namespace,
+            '/references',
+            [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [ $this, 'references' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -95,7 +111,9 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             ]
         );
         register_rest_route(
-            $namespace, '/typeahead_users_teams_groups', [
+            $namespace,
+            '/typeahead_users_teams_groups',
+            [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [ $this, 'typeahead_users_teams_groups' ],
                 'permission_callback' => function ( WP_REST_Request $request ) {
@@ -103,21 +121,69 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                 }
             ]
         );
+
+        register_rest_route(
+            $namespace,
+            '/exists_magic_link_fields_sort_order',
+            [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [ $this, 'exists_magic_link_fields_sort_order' ],
+                'permission_callback' => function ( WP_REST_Request $request ) {
+                    return $this->has_permission();
+                }
+            ]
+        );
+
+        register_rest_route(
+            $namespace,
+            '/get_magic_link_fields_sort_order',
+            [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [ $this, 'get_magic_link_fields_sort_order' ],
+                'permission_callback' => function ( WP_REST_Request $request ) {
+                    return $this->has_permission();
+                }
+            ]
+        );
+
+        register_rest_route(
+            $namespace,
+            '/add_magic_link_fields_sort_order',
+            [
+                'methods'             => WP_REST_Server::CREATABLE,
+                'callback'            => [ $this, 'add_magic_link_fields_sort_order' ],
+                'permission_callback' => function ( WP_REST_Request $request ) {
+                    return $this->has_permission();
+                }
+            ]
+        );
+
+        register_rest_route(
+            $namespace,
+            '/update_magic_link_fields_sort_order',
+            [
+                'methods'             => WP_REST_Server::EDITABLE,
+                'callback'            => [ $this, 'update_magic_link_fields_sort_order' ],
+                'permission_callback' => function ( WP_REST_Request $request ) {
+                    return $this->has_permission();
+                }
+            ]
+        );
     }
 
-    public function setup_payload( WP_REST_Request $request ): array{
+    public function setup_payload( WP_REST_Request $request ): array {
         $params = $request->get_params();
         $response = [];
-        if ( isset( $params['dt_magic_link_types'] ) && filter_var( $params['dt_magic_link_types'], FILTER_VALIDATE_BOOLEAN ) ){
+        if ( isset( $params['dt_magic_link_types'] ) && filter_var( $params['dt_magic_link_types'], FILTER_VALIDATE_BOOLEAN ) ) {
             $response['dt_magic_link_types'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_magic_link_types();
         }
-        if ( isset( $params['dt_magic_link_templates'] ) && filter_var( $params['dt_magic_link_templates'], FILTER_VALIDATE_BOOLEAN ) ){
+        if ( isset( $params['dt_magic_link_templates'] ) && filter_var( $params['dt_magic_link_templates'], FILTER_VALIDATE_BOOLEAN ) ) {
             $response['dt_magic_link_templates'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option( Disciple_Tools_Bulk_Magic_Link_Sender_API::$option_dt_magic_links_templates );
         }
-        if ( isset( $params['dt_magic_link_objects'] ) && filter_var( $params['dt_magic_link_objects'], FILTER_VALIDATE_BOOLEAN ) ){
+        if ( isset( $params['dt_magic_link_objects'] ) && filter_var( $params['dt_magic_link_objects'], FILTER_VALIDATE_BOOLEAN ) ) {
             $response['dt_magic_link_objects'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_objs();
         }
-        if ( isset( $params['dt_sending_channels'] ) && filter_var( $params['dt_sending_channels'], FILTER_VALIDATE_BOOLEAN ) ){
+        if ( isset( $params['dt_sending_channels'] ) && filter_var( $params['dt_sending_channels'], FILTER_VALIDATE_BOOLEAN ) ) {
             $response['dt_sending_channels'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_sending_channels();
         }
 
@@ -136,22 +202,22 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             if ( in_array( $params['post_type'], [ 'dt_users', 'dt_teams', 'dt_groups' ] ) ) {
                 switch ( $params['post_type'] ) {
                     case 'dt_users':
-                        $response['post'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_users( true, [
+                        $response['post'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_users(true, [
                             'type' => 'id',
                             'query' => $params['post_id']
-                        ] );
+                        ]);
                         break;
                     case 'dt_teams':
-                        $response['post'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_teams( true, [
+                        $response['post'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_teams(true, [
                             'type' => 'id',
                             'query' => $params['post_id']
-                        ] );
+                        ]);
                         break;
                     case 'dt_groups':
-                        $response['post'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_groups( true, [
+                        $response['post'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_groups(true, [
                             'type' => 'id',
                             'query' => $params['post_id']
-                        ] );
+                        ]);
                         break;
                 }
 
@@ -159,7 +225,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                 $response['message'] = 'Successfully loaded ' . $params['post_type'] . ' post record for id: ' . $params['post_id'];
             } else {
                 $post = DT_Posts::get_post( $params['post_type'], $params['post_id'], true, false, true );
-                if ( ! empty( $post ) && ! is_wp_error( $post ) ) {
+                if ( !empty( $post ) && !is_wp_error( $post ) ) {
 
                     // Also, check for any associated magic links
                     $post['ml_links'] = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_post_magic_links( $post['ID'] );
@@ -168,7 +234,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                     $response['post']    = $post;
                     $response['success'] = true;
                     $response['message'] = 'Successfully loaded ' . $params['post_type'] . ' post record for id: ' . $params['post_id'];
-
                 } else {
                     $response['success'] = false;
                     $response['message'] = 'Unable to locate a valid ' . $params['post_type'] . ' post record for id: ' . $params['post_id'];
@@ -234,7 +299,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
 
             // Ensure current user has sufficient capabilities/roles for the tasks ahead!
             $current_user = wp_get_current_user();
-            if ( ! empty( $current_user ) && ! is_wp_error( $current_user ) && ! current_user_can( 'access_contacts' ) ) {
+            if ( !empty( $current_user ) && !is_wp_error( $current_user ) && !current_user_can( 'access_contacts' ) ) {
                 $current_user->add_role( 'access_contacts' );
             }
 
@@ -242,7 +307,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             $response['success']   = true;
             $response['message']   = 'User links management action[' . $params['action'] . '] successfully executed.';
             $response['assigned']  = $assigned;
-
         } else {
             $response['success'] = false;
             $response['message'] = 'Unable to execute action, due to missing parameters.';
@@ -268,7 +332,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
 
                     // Load and update link object with new assignment
                     $link_obj = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj( $params['link_obj_id'] );
-                    if ( ! empty( $link_obj ) && isset( $link_obj->id ) && ! Disciple_Tools_Bulk_Magic_Link_Sender_API::is_already_assigned( $record->id, $link_obj ) ) {
+                    if ( !empty( $link_obj ) && isset( $link_obj->id ) && !Disciple_Tools_Bulk_Magic_Link_Sender_API::is_already_assigned( $record->id, $link_obj ) ) {
 
                         // Update link object accordingly
                         $link_obj->type       = $params['magic_link_type'];
@@ -291,7 +355,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                                 $never_expires = in_array( strtolower( $params['links_never_expires'] ), [ 'true' ] );
 
                                 $record = Disciple_Tools_Bulk_Magic_Link_Sender_API::refresh_user_links_expiration_values( $record, $base_ts, $amt, $time_unit, $never_expires );
-
                             }
 
                             // Capture newly created magic link in url form
@@ -315,7 +378,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                         // All is well.. ;)
                         $response['success'] = true;
                         $response['record']  = $record;
-
                     } else {
                         $response['success'] = false;
                         $response['message'] = 'Unable to execute action[' . $params['action'] . '], due to invalid link object and/or record already assigned.';
@@ -327,7 +389,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
 
                     // Load and update link object with new assignment
                     $link_obj = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj( $params['link_obj_id'] );
-                    if ( ! empty( $link_obj ) && isset( $link_obj->id ) && Disciple_Tools_Bulk_Magic_Link_Sender_API::is_already_assigned( $record->id, $link_obj ) ) {
+                    if ( !empty( $link_obj ) && isset( $link_obj->id ) && Disciple_Tools_Bulk_Magic_Link_Sender_API::is_already_assigned( $record->id, $link_obj ) ) {
 
                         // Update link object accordingly
                         $updated_assigned = [];
@@ -352,7 +414,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
 
                         // All is well.. ;)
                         $response['success'] = true;
-
                     } else {
                         $response['success'] = false;
                         $response['message'] = 'Unable to execute action[' . $params['action'] . '], due to invalid link object and/or record not already assigned.';
@@ -387,7 +448,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
 
             // Attempt to load link object based on submitted id
             $link_obj = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj( $params['link_obj_id'] );
-            if ( ! empty( $link_obj ) ) {
+            if ( !empty( $link_obj ) ) {
 
                 $logs[] = Disciple_Tools_Bulk_Magic_Link_Sender_API::logging_create( 'Processing Link Object: ' . $link_obj->name );
 
@@ -408,11 +469,11 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                  * If present, capture latest message text.
                  */
 
-                if ( ! empty( $params['message_subject'] ) ) {
+                if ( !empty( $params['message_subject'] ) ) {
                     $link_obj->message_subject = $params['message_subject'];
                 }
 
-                if ( ! empty( $params['message'] ) ) {
+                if ( !empty( $params['message'] ) ) {
                     $link_obj->message = $params['message'];
                 }
 
@@ -433,7 +494,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                         // Capture any updates
                         $link_obj           = $send_response['link_obj'];
                         $updated_assigned[] = $send_response['user'];
-
                     } else {
                         $updated_assigned[] = $assigned;
                     }
@@ -447,7 +507,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
                 $response['success']  = true;
                 $response['message']  = 'Send request completed - See logging tab for further details.';
                 $response['assigned'] = $updated_assigned;
-
             } else {
                 $msg    = 'Unable to locate corresponding link object for id: ' . $params['link_obj_id'];
                 $logs[] = Disciple_Tools_Bulk_Magic_Link_Sender_API::logging_create( $msg );
@@ -458,7 +517,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
 
             // Update logging information
             Disciple_Tools_Bulk_Magic_Link_Sender_API::logging_update( $logs );
-
         } else {
             $response['success'] = false;
             $response['message'] = 'Unable to send any messages, due to unrecognizable parameters.';
@@ -467,16 +525,15 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
         return $response;
     }
 
-    public function next_scheduled_run( WP_REST_Request $request ): array{
+    public function next_scheduled_run( WP_REST_Request $request ): array {
 
         // Prepare response payload
         $response = [];
         $response['success'] = false;
 
         $params = $request->get_params();
-        if ( !isset( $params['link_obj_id'] ) ){
+        if ( !isset( $params['link_obj_id'] ) ) {
             $response['message'] = 'Unable to detect required link object id!';
-
         } else {
             $response['message'] = '';
             $response['next_run_ts'] = 0;
@@ -484,8 +541,8 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
             $response['next_run_relative'] = '---';
 
             $link_obj = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj( $params['link_obj_id'] );
-            if ( !empty( $link_obj ) && $link_obj->enabled ){
-                if ( ( isset( $link_obj->schedule->enabled ) && $link_obj->schedule->enabled ) && !empty( $link_obj->schedule->freq_amount ) && !empty( $link_obj->schedule->freq_time_unit ) && !empty( $link_obj->schedule->last_schedule_run ) ){
+            if ( !empty( $link_obj ) && $link_obj->enabled ) {
+                if ( ( isset( $link_obj->schedule->enabled ) && $link_obj->schedule->enabled ) && !empty( $link_obj->schedule->freq_amount ) && !empty( $link_obj->schedule->freq_time_unit ) && !empty( $link_obj->schedule->last_schedule_run ) ) {
                     $next_run = strtotime( '+' . $link_obj->schedule->freq_amount . ' ' . $link_obj->schedule->freq_time_unit, $link_obj->schedule->last_schedule_run );
                     $next_scheduled_run = Disciple_Tools_Bulk_Magic_Link_Sender_API::format_timestamp_in_local_time_zone( $next_run );
                     $next_scheduled_run_relative = Disciple_Tools_Bulk_Magic_Link_Sender_API::determine_relative_date( $next_run );
@@ -506,15 +563,14 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
         // Prepare response payload
         $response = [];
 
-        if ( ! isset( $request->get_params()['id'] ) ) {
+        if ( !isset( $request->get_params()['id'] ) ) {
             $response['success'] = false;
             $response['message'] = 'Unable to detect required report id!';
             $response['report']  = null;
-
         } else {
             $id      = $request->get_params()['id'];
             $report  = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_report( $id );
-            $success = ! empty( $report );
+            $success = !empty( $report );
 
             $response['success'] = $success;
             $response['message'] = $success ? 'Loaded data for report id: ' . $id : 'Unable to load data for report id: ' . $id;
@@ -524,16 +580,16 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
         return $response;
     }
 
-    public function references( WP_REST_Request $request ): array{
+    public function references( WP_REST_Request $request ): array {
 
         // Prepare response payload
         $response = [];
 
         $params = $request->get_params();
-        if ( isset( $params['action'] ) ){
+        if ( isset( $params['action'] ) ) {
 
             // Execute accordingly, based on specified action
-            switch ( $params['action'] ){
+            switch ( $params['action'] ) {
                 case 'refresh':
                     $response['success'] = true;
                     $response['message'] = 'References action[' . $params['action'] . '] successfully executed.';
@@ -554,19 +610,19 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
         $dt_teams = [];
         $dt_groups = [];
 
-        if ( ! empty( $query ) ) {
-            $dt_users = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_users( true, [
+        if ( !empty( $query ) ) {
+            $dt_users = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_users(true, [
                 'type' => 'name',
                 'query' => $query
-            ] );
-            $dt_teams = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_teams( true, [
+            ]);
+            $dt_teams = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_teams(true, [
                 'type' => 'name',
                 'query' => $query
-            ] );
-            $dt_groups = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_groups( true, [
+            ]);
+            $dt_groups = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_dt_groups(true, [
                 'type' => 'name',
                 'query' => $query
-            ] );
+            ]);
         }
 
         return [
@@ -582,6 +638,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
         if ( is_null( self::$_instance ) ) {
             self::$_instance = new self();
         }
+
 
         return self::$_instance;
     } // End instance()
@@ -599,6 +656,60 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Endpoints {
         }
 
         return $pass;
+    }
+
+    public function exists_magic_link_fields_sort_order() {
+        $response = $wpdb->get_results("
+            SELECT EXISTS(
+            SELECT *
+            FROM $wpdb->options
+            WHERE 'option_name' = 'magic_link_field_sort_order')
+        ", ARRAY_A);
+
+        return $response;
+    }
+
+    public function get_magic_link_fields_sort_order() {
+        $response = [];
+        return $response;
+    }
+
+    public function add_magic_link_fields_sort_order( WP_REST_Request $request ) {
+        $params = $request->get_params();
+
+        global $wpdb;
+        $wpdb->insert(
+            $wpdb->prefix . 'options',
+            array(
+                'option_name' => 'magic_link_fields_sort_order',
+                'option_value' => $params['sort_order']
+            )
+        );
+
+        return [
+            'success' => true,
+            'message' => 'Added magic link fields sort order.'
+        ];
+    }
+
+    public function update_magic_link_fields_sort_order( WP_REST_Request $request ) {
+        $params = $request->get_params();
+
+        global $wpdb;
+        $wpdb->update(
+            $wpdb->prefix . 'options',
+            array(
+                'option_value' => $params['sort_order'],
+            ),
+            array(
+                'option_name' => 'magic_link_fields_sort_order'
+            )
+        );
+
+        return [
+            'success' => true,
+            'message' => 'Updated magic link fields sort order.'
+        ];
     }
 }
 

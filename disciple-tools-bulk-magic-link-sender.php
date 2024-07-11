@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Plugin Name: Disciple Tools - Magic Links
+ * Plugin Name: Disciple Tools - Magic Links Venture
  * Plugin URI: https://github.com/DiscipleTools/disciple-tools-bulk-magic-link-sender
  * Description: Disciple Tools - Magic Links for users, contacts, groups and teams assignment + schedule management for magic links dispatching over configured sending channels.
  * Text Domain: disciple-tools-bulk-magic-link-sender
@@ -19,7 +20,7 @@
  */
 
 
-if ( ! defined( 'ABSPATH' ) ) {
+if ( !defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly
 }
 
@@ -45,18 +46,17 @@ function disciple_tools_bulk_magic_link_sender() {
 
         return false;
     }
-    if ( ! $is_theme_dt ) {
+    if ( !$is_theme_dt ) {
         return false;
     }
     /**
      * Load useful function from the theme
      */
-    if ( ! defined( 'DT_FUNCTIONS_READY' ) ) {
+    if ( !defined( 'DT_FUNCTIONS_READY' ) ) {
         require_once get_template_directory() . '/dt-core/global-functions.php';
     }
 
     return Disciple_Tools_Bulk_Magic_Link_Sender::instance();
-
 }
 
 add_action( 'after_setup_theme', 'disciple_tools_bulk_magic_link_sender', 20 );
@@ -109,7 +109,6 @@ class Disciple_Tools_Bulk_Magic_Link_Sender {
         try {
             require_once( plugin_dir_path( __FILE__ ) . 'includes/class-migration-engine.php' );
             Disciple_Tools_Bulk_Magic_Link_Migration_Engine::migrate( Disciple_Tools_Bulk_Magic_Link_Migration_Engine::$migration_number );
-
         } catch ( Throwable $e ) {
             new WP_Error( 'migration_error', 'Migration engine failed to migrate.' );
         }
@@ -222,7 +221,7 @@ register_activation_hook( __FILE__, [ 'Disciple_Tools_Bulk_Magic_Link_Sender', '
 register_deactivation_hook( __FILE__, [ 'Disciple_Tools_Bulk_Magic_Link_Sender', 'deactivation' ] );
 
 
-if ( ! function_exists( 'disciple_tools_magic_links_hook_admin_notice' ) ) {
+if ( !function_exists( 'disciple_tools_magic_links_hook_admin_notice' ) ) {
     function disciple_tools_magic_links_hook_admin_notice() {
         global $disciple_tools_magic_links_required_dt_theme_version;
         $wp_theme        = wp_get_theme();
@@ -232,14 +231,13 @@ if ( ! function_exists( 'disciple_tools_magic_links_hook_admin_notice' ) ) {
             $message .= ' ' . sprintf( esc_html( 'Current Disciple Tools version: %1$s, required version: %2$s' ), esc_html( $current_version ), esc_html( $disciple_tools_magic_links_required_dt_theme_version ) );
         }
         // Check if it's been dismissed...
-        if ( ! get_option( 'dismissed-disciple-tools-bulk-magic-link-sender', false ) ) { ?>
-            <div class="notice notice-error notice-disciple-tools-bulk-magic-link-sender is-dismissible"
-                 data-notice="disciple-tools-bulk-magic-link-sender">
+        if ( !get_option( 'dismissed-disciple-tools-bulk-magic-link-sender', false ) ) { ?>
+            <div class="notice notice-error notice-disciple-tools-bulk-magic-link-sender is-dismissible" data-notice="disciple-tools-bulk-magic-link-sender">
                 <p><?php echo esc_html( $message ); ?></p>
             </div>
             <script>
-                jQuery(function ($) {
-                    $(document).on('click', '.notice-disciple-tools-bulk-magic-link-sender .notice-dismiss', function () {
+                jQuery(function($) {
+                    $(document).on('click', '.notice-disciple-tools-bulk-magic-link-sender .notice-dismiss', function() {
                         $.ajax(ajaxurl, {
                             type: 'POST',
                             data: {
@@ -251,14 +249,14 @@ if ( ! function_exists( 'disciple_tools_magic_links_hook_admin_notice' ) ) {
                     });
                 });
             </script>
-        <?php }
+<?php }
     }
 }
 
 /**
  * AJAX handler to store the state of dismissible notices.
  */
-if ( ! function_exists( 'dt_hook_ajax_notice_handler' ) ) {
+if ( !function_exists( 'dt_hook_ajax_notice_handler' ) ) {
     function dt_hook_ajax_notice_handler() {
         check_ajax_referer( 'wp_rest_dismiss', 'security' );
         if ( isset( $_POST['type'] ) ) {
@@ -277,10 +275,10 @@ if ( ! function_exists( 'dt_hook_ajax_notice_handler' ) ) {
  * Also, see the instructions for version updating to understand the steps involved.
  * @see https://github.com/DiscipleTools/disciple-tools-version-control/wiki/How-to-Update-the-Starter-Plugin
  */
-add_action( 'plugins_loaded', function () {
-    if ( is_admin() && ! ( is_multisite() && class_exists( 'DT_Multisite' ) ) || wp_doing_cron() ) {
+add_action('plugins_loaded', function () {
+    if ( is_admin() && !( is_multisite() && class_exists( 'DT_Multisite' ) ) || wp_doing_cron() ) {
         // Check for plugin updates
-        if ( ! class_exists( 'Puc_v4_Factory' ) ) {
+        if ( !class_exists( 'Puc_v4_Factory' ) ) {
             if ( file_exists( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' ) ) {
                 require( get_template_directory() . '/dt-core/libraries/plugin-update-checker/plugin-update-checker.php' );
             }
@@ -291,17 +289,16 @@ add_action( 'plugins_loaded', function () {
                 __FILE__,
                 'disciple-tools-bulk-magic-link-sender'
             );
-
         }
     }
-} );
+});
 
 /**
  * Require plugins with the TGM library.
  *
  * This defines the required and suggested plugins.
  */
-add_action( 'tgmpa_register', function () {
+add_action('tgmpa_register', function () {
     /**
      * Array of plugin arrays. Required keys are name and slug.
      * If the source is NOT from the .org repo, then source is also required.
@@ -344,5 +341,4 @@ add_action( 'tgmpa_register', function () {
     ];
 
     tgmpa( $plugins, $config );
-
-} );
+});

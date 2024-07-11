@@ -469,10 +469,95 @@ jQuery(function ($) {
       }
     }
 
-    return type_obj;
+    // NERDAR CHANGES
+    const magicLinkFieldsSortOrder = window.dt_magic_links.magic_link_fields_sort_order
+    let mappedFields = []
+
+    if(magicLinkFieldsSortOrder === null || magicLinkFieldsSortOrder.length === 0) {
+      console.log('1. sort order not found. doing initial set sort order.')
+      mappedFields = initialSetSortOrder(type_key, type_obj)
+
+    } else {
+      console.log('1. sort order found.')
+
+      // check magic link type first
+      // update accordingly
+
+      const mlTypeSortOrder = magicLinkFieldsSortOrder.find(mlso => mlso.type_key === type_key)
+      const fields = type_obj.meta.fields
+
+      if(mlTypeSortOrder !== undefined) {
+        console.log('ml type found. does not need to set anything. using existing order setting.')
+
+        mlTypeSortOrder.sort_order.forEach(mlso => {
+          const originalFieldDetails = fields.find(f => f.id === mlso.id)
+          mappedFields.push({
+            ...originalFieldDetails,
+            key: mlso.key
+          })
+        })
+
+      } else {
+        console.log('ml type not found in sort order setting. doing initial set for ml type.')
+
+        mappedFields = initialSetSortOrder(type_key, type_obj)
+        /*
+        mappedFields = type_obj.meta.fields.map((of, idx) => {
+          return {
+            ...of,
+            'key': idx + 1
+          }
+        })
+        */
+      }
+    }
+
+    type_obj.meta.fields = mappedFields
+
+    return type_obj
+  }
+
+  function initialSetSortOrder (type_key, type_obj) {
+    const magicLinkFieldsSortOrder = window.dt_magic_links.magic_link_fields_sort_order
+    let sortOrders = []
+
+    const mappedFields = type_obj.meta.fields.map((of, idx) => {
+      return {
+        ...of,
+        'key': idx + 1
+      }
+    })
+
+    const order = {
+      type_key,
+      sort_order: mappedFields.map((mf) => {
+        return {
+          'id': mf.id,
+          'key': mf.key
+        }
+      })
+    }
+
+    if(magicLinkFieldsSortOrder !== null) {
+
+      // not current key
+      if(magicLinkFieldsSortOrder.find(mlso => mlso.type_key === type_key) === undefined) {
+        magicLinkFieldsSortOrder.push(order)
+        sortOrders = [...magicLinkFieldsSortOrder]
+      } else { // current key
+        sortOrders = [order]
+      }
+    } else {
+      sortOrders = [order]
+    }
+    
+    save_magic_link_sort_order(sortOrders)
+    
+    return mappedFields
   }
 
   function fetch_magic_link_template(type_key) {
+
     let template = null;
 
     if (type_key) {
@@ -495,17 +580,99 @@ jQuery(function ($) {
     return template;
   }
 
+  function save_magic_link_sort_order(sort_order) {
+    const sortOrder = window.dt_magic_links.magic_link_fields_sort_order 
+    const sortOrderExists = sortOrder === null ? false : true
+
+    // const url = window.dt_magic_links.magic_link_fields_sort_order.length > 1 ? 'update' : 'add'
+    // const method = window.dt_magic_links.magic_link_fields_sort_order.length > 1 ? 'PUT' : 'POST'
+
+    const url = sortOrderExists ? 'update' : 'add'
+    const method = sortOrderExists ? 'PUT' : 'POST'
+
+    $.ajax({
+      url: window.dt_magic_links[`dt_endpoint_${url}_magic_link_fields_sort_order`],
+      method,
+      data: {
+        sort_order: JSON.stringify(sort_order)
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+      },
+      success: function (data) {
+        if (data && data['success'] === true) {
+          console.log(data.message)
+          window.dt_magic_links.magic_link_fields_sort_order = sort_order
+
+        } else {
+          console.log(data);
+        }
+      },
+      error: function (data) {
+        console.log(data);
+      }
+    });
+  }
+
   function is_template(type_key) {
     return (type_key && type_key.includes('templates_'));
   }
 
-  function build_magic_link_type_field_html(type_key, id, label, field_type) {
-    return `<tr>
+  // NERDAR CHANGES
+  // added sort key
+  function build_magic_link_type_field_html(type_key, id, label, field_type, sort_key = 0) {
+    return `<tr class="ui-state-default">
+              <td width="50" style="text-align: center;"><span class="ui-icon ui-icon-arrow-4"></span></td>
+              <td width="0" style="padding: 0px; width: 0px;" class="sortable-field-options-key"><span style="display:none;">${sort_key}</span></td>
               <input id="ml_main_col_ml_type_fields_table_row_field_type" type="hidden" value="${field_type}">
               <input id="ml_main_col_ml_type_fields_table_row_field_id" type="hidden" value="${id}">
               <td>${window.lodash.escape(label)}</td>
               <td><input id="ml_main_col_ml_type_fields_table_row_field_enabled" type="checkbox" ${is_magic_link_type_field_enabled(type_key, id, fetch_link_obj($('#ml_main_col_available_link_objs_select').val())) ? 'checked' : ''}></td>
             </tr>`;
+  }
+
+  function initMagicLinkTypeTableSortable () {
+    let type_key = $('#ml_main_col_link_objs_manage_type').val();
+
+    $('#ml_main_col_ml_type_fields_table .sortable-field-options')
+    .sortable({
+      connectWith: '.sortable-field-options',
+      placeholder: 'ui-state-highlight',
+      update: function (evt, ui) {
+        let updatedSortOrder = [];
+
+        $('.sortable-field-options')
+          .find('.sortable-field-options-key')
+          .each(function (idx, key_div) {
+            let key = $(key_div).text().trim();
+            if (key) {
+              updatedSortOrder.push(key)
+            }
+          })
+
+        let newSortOrder = []
+        const magicLinkFieldsSortOrder = window.dt_magic_links.magic_link_fields_sort_order
+        const currentSortOrder = magicLinkFieldsSortOrder.find(mlso => mlso.type_key === type_key)
+
+        updatedSortOrder.forEach(uso => {
+          const field = currentSortOrder.sort_order.find(mlso => parseInt(mlso.key) === parseInt(uso))
+          newSortOrder.push({
+            id: field.id,
+            key: uso
+          })
+        })
+
+        save_magic_link_sort_order([
+          { type_key, sort_order: newSortOrder },
+          ...magicLinkFieldsSortOrder.filter(mlso => mlso.type_key !== type_key)
+        ])
+        
+        $('#sortable_field_options_ordering').val(
+          JSON.stringify(updatedSortOrder),
+        );
+      },
+    })
+    .disableSelection();
   }
 
   function display_magic_link_type_fields() {
@@ -530,7 +697,7 @@ jQuery(function ($) {
           // Ignore disabled fields
           $.each(template['fields'], function (idx, field) {
             if (field['enabled']) {
-              fields_table.find('tbody:last').append(build_magic_link_type_field_html(type_key, field['id'], field['label'], ''));
+              fields_table.find('tbody:last').append(build_magic_link_type_field_html(type_key, field['id'], field['label'], '', field['key']));
             }
           });
 
@@ -546,7 +713,7 @@ jQuery(function ($) {
           // Refresh fields list accordingly
           type_obj['meta']['fields'].forEach(function (field, field_idx) {
             if (field['id'] && field['label']) {
-              fields_table.find('tbody:last').append(build_magic_link_type_field_html(type_key, field['id'], field['label'], field['field_type']));
+              fields_table.find('tbody:last').append(build_magic_link_type_field_html(type_key, field['id'], field['label'], field['field_type'], field['key']));
             }
           });
 
@@ -604,6 +771,8 @@ jQuery(function ($) {
       fields_table.fadeIn('fast');
 
     });
+
+    initMagicLinkTypeTableSortable()
   }
 
   function adjust_config_table_settings() {
