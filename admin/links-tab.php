@@ -1,13 +1,12 @@
 <?php
-if ( !defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
     exit;
 } // Exit if accessed directly
 
 /**
  * Class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
  */
-class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
-{
+class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links {
 
     public function __construct() {
 
@@ -19,17 +18,17 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
     }
 
     private function process_scripts() {
-        wp_register_style( 'daterangepicker-css', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css', [], '3.1.0' );
-        wp_enqueue_style( 'daterangepicker-css' );
-        wp_enqueue_script( 'daterangepicker-js', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.js', [ 'moment' ], '3.1.0', true );
+        wp_register_style('daterangepicker-css', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.css', [], '3.1.0');
+        wp_enqueue_style('daterangepicker-css');
+        wp_enqueue_script('daterangepicker-js', 'https://cdn.jsdelivr.net/npm/daterangepicker@3.1.0/daterangepicker.js', ['moment'], '3.1.0', true);
 
-        dt_theme_enqueue_script( 'typeahead-jquery', 'dt-core/dependencies/typeahead/dist/jquery.typeahead.min.js', array( 'jquery' ), true );
-        dt_theme_enqueue_style( 'typeahead-jquery-css', 'dt-core/dependencies/typeahead/dist/jquery.typeahead.min.css', array() );
+        dt_theme_enqueue_script('typeahead-jquery', 'dt-core/dependencies/typeahead/dist/jquery.typeahead.min.js', array('jquery'), true);
+        dt_theme_enqueue_style('typeahead-jquery-css', 'dt-core/dependencies/typeahead/dist/jquery.typeahead.min.css', array());
 
-        wp_register_style( 'jquery-ui', 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css', [], '1.12.1' );
-        wp_enqueue_style( 'jquery-ui' );
+        wp_register_style('jquery-ui', 'https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css', [], '1.12.1');
+        wp_enqueue_style('jquery-ui');
 
-        wp_enqueue_script('dt_magic_links_script', plugin_dir_url( __FILE__ ) . 'js/links-tab.js', [
+        wp_enqueue_script('dt_magic_links_script', plugin_dir_url(__FILE__) . 'js/links-tab.js', [
             'jquery',
             'lodash',
             'moment',
@@ -38,7 +37,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
             'jquery-ui-core',
             'jquery-ui-sortable',
             'jquery-ui-dialog'
-        ], filemtime( dirname( __FILE__ ) . '/js/links-tab.js' ), true);
+        ], filemtime(dirname(__FILE__) . '/js/links-tab.js'), true);
 
         wp_localize_script(
             'dt_magic_links_script',
@@ -59,88 +58,111 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 'dt_default_message'            => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_default_send_msg(),
                 'dt_default_send_channel_id'    => Disciple_Tools_Bulk_Magic_Link_Sender_API::$channel_email_id,
                 'dt_base_url'                   => rest_url(),
-                'dt_wp_nonce'                   => esc_attr( wp_create_nonce( 'wp_rest' ) ),
+                'dt_wp_nonce'                   => esc_attr(wp_create_nonce('wp_rest')),
                 'dt_previous_updated_link_obj'  => $this->fetch_previous_updated_link_obj(),
                 'dt_supported_template_post_types'  => $this->supported_template_post_types(),
 
-                'dt_endpoint_exists_magic_link_fields_sort_order' => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_exists_magic_link_fields_sort_order(),
-                'dt_endpoint_get_magic_link_fields_sort_order' => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_get_magic_link_fields_sort_order(),
-                'dt_endpoint_add_magic_link_fields_sort_order' => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_add_magic_link_fields_sort_order(),
-                'dt_endpoint_update_magic_link_fields_sort_order' => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_update_magic_link_fields_sort_order(),
-                'magic_link_fields_sort_order' => Disciple_Tools_Bulk_Magic_Link_Sender_API::magic_link_fields_sort_order(),
+                // sorting order
+                'dt_endpoint_exists_magic_link_fields_sort_order'   => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_exists_magic_link_fields_sort_order(),
+                'dt_endpoint_get_magic_link_fields_sort_order'      => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_get_magic_link_fields_sort_order(),
+                'dt_endpoint_add_magic_link_fields_sort_order'      => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_add_magic_link_fields_sort_order(),
+                'dt_endpoint_update_magic_link_fields_sort_order'   => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_update_magic_link_fields_sort_order(),
+
+                // custom branding
+                'dt_endpoint_add_magic_link_custom_branding'        => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_add_magic_link_custom_branding(),
+                'dt_endpoint_update_magic_link_custom_branding'     => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_update_magic_link_custom_branding(),
+                'magic_link_fields_sort_order'                      => Disciple_Tools_Bulk_Magic_Link_Sender_API::magic_link_fields_sort_order(),
+                'magic_link_custom_branding'                        => Disciple_Tools_Bulk_Magic_Link_Sender_API::magic_link_custom_branding(),
+
+                // custom branding icon
+                'dt_endpoint_handle_upload_custom_branding_icon'    => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_handle_upload_custom_branding_icon(),
+                'dt_endpoint_get_custom_branding_icon'              => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_get_custom_branding_icon(),
+                'dt_endpoint_delete_custom_branding_icon'           => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_delete_custom_branding_icon(),
+
+                // custom branding display options
+                'dt_endpoint_save_custom_branding_display_options'  => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_save_custom_branding_display_options(),
+                'dt_endpoint_get_custom_branding_display_options'   => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_get_custom_branding_display_options(),
+
+                // custom branding enable
+                'dt_endpoint_get_custom_branding_enable'            => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_get_custom_branding_enable(),
+                'dt_endpoint_save_custom_branding_enable'           => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_save_custom_branding_enable(),
+
+                // custom branding name
+                'dt_endpoint_get_custom_branding_name'              => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_get_custom_branding_name(),
+                'dt_endpoint_save_custom_branding_name'             => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_save_custom_branding_name(),
             )
         );
     }
 
     private function fetch_previous_updated_link_obj() {
-        if ( isset( $_POST['ml_main_col_update_form_nonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['ml_main_col_update_form_nonce'] ) ), 'ml_main_col_update_form_nonce' ) ) {
-            if ( isset( $_POST['ml_main_col_update_form_link_obj'] ) ) {
-                $sanitized_input = filter_var( wp_unslash( $_POST['ml_main_col_update_form_link_obj'] ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_NO_ENCODE_QUOTES );
+        if (isset($_POST['ml_main_col_update_form_nonce']) && wp_verify_nonce(sanitize_key(wp_unslash($_POST['ml_main_col_update_form_nonce'])), 'ml_main_col_update_form_nonce')) {
+            if (isset($_POST['ml_main_col_update_form_link_obj'])) {
+                $sanitized_input = filter_var(wp_unslash($_POST['ml_main_col_update_form_link_obj']), FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_NO_ENCODE_QUOTES);
 
-                return json_decode( $this->final_post_param_sanitization( $sanitized_input ) );
+                return json_decode($this->final_post_param_sanitization($sanitized_input));
             }
         }
 
         return null;
     }
 
-    private function final_post_param_sanitization( $str ) {
-        return str_replace( [ '&lt;', '&gt;' ], [ '<', '>' ], $str );
+    private function final_post_param_sanitization($str) {
+        return str_replace(['&lt;', '&gt;'], ['<', '>'], $str);
     }
 
     private function process_updates() {
 
-        if ( isset( $_POST['ml_main_col_update_form_nonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['ml_main_col_update_form_nonce'] ) ), 'ml_main_col_update_form_nonce' ) ) {
-            if ( isset( $_POST['ml_main_col_update_form_link_obj'] ) ) {
+        if (isset($_POST['ml_main_col_update_form_nonce']) && wp_verify_nonce(sanitize_key(wp_unslash($_POST['ml_main_col_update_form_nonce'])), 'ml_main_col_update_form_nonce')) {
+            if (isset($_POST['ml_main_col_update_form_link_obj'])) {
 
                 // Fetch newly updated link object
-                $sanitized_input   = filter_var( wp_unslash( $_POST['ml_main_col_update_form_link_obj'] ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_NO_ENCODE_QUOTES );
-                $updating_link_obj = json_decode( $this->final_post_param_sanitization( $sanitized_input ) );
+                $sanitized_input   = filter_var(wp_unslash($_POST['ml_main_col_update_form_link_obj']), FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_NO_ENCODE_QUOTES);
+                $updating_link_obj = json_decode($this->final_post_param_sanitization($sanitized_input));
 
                 // Ensure we have something to work with
-                if ( !empty( $updating_link_obj ) && isset( $updating_link_obj->id ) ) {
+                if (!empty($updating_link_obj) && isset($updating_link_obj->id)) {
 
                     // Attempt to locate an existing object with same id
-                    $current_link_obj = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj( $updating_link_obj->id );
+                    $current_link_obj = Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_option_link_obj($updating_link_obj->id);
 
                     // In an attempt to be more surgical, identify and only focus
                     // on the deltas between previously saved and recently updated..!
-                    $stale_users = Disciple_Tools_Bulk_Magic_Link_Sender_API::extract_assigned_user_deltas( $current_link_obj->assigned ?? [], $updating_link_obj->assigned ?? [] );
-                    $new_users   = Disciple_Tools_Bulk_Magic_Link_Sender_API::extract_assigned_user_deltas( $updating_link_obj->assigned ?? [], $current_link_obj->assigned ?? [] );
+                    $stale_users = Disciple_Tools_Bulk_Magic_Link_Sender_API::extract_assigned_user_deltas($current_link_obj->assigned ?? [], $updating_link_obj->assigned ?? []);
+                    $new_users   = Disciple_Tools_Bulk_Magic_Link_Sender_API::extract_assigned_user_deltas($updating_link_obj->assigned ?? [], $current_link_obj->assigned ?? []);
 
                     // If this is the very first update, ensure all new users are identified
                     // and processed accordingly!
-                    if ( !isset( $current_link_obj->id ) && empty( $new_users ) && !empty( $updating_link_obj->assigned ) ) {
+                    if (!isset($current_link_obj->id) && empty($new_users) && !empty($updating_link_obj->assigned)) {
                         $new_users = $updating_link_obj->assigned;
                     }
 
                     // Refresh user magic links accordingly; stale users to have links removed,
                     // whilst new users are to have links created and assigned.
-                    Disciple_Tools_Bulk_Magic_Link_Sender_API::update_magic_links( $current_link_obj ?? null, $stale_users, true );
-                    Disciple_Tools_Bulk_Magic_Link_Sender_API::update_magic_links( $updating_link_obj, $new_users, false );
+                    Disciple_Tools_Bulk_Magic_Link_Sender_API::update_magic_links($current_link_obj ?? null, $stale_users, true);
+                    Disciple_Tools_Bulk_Magic_Link_Sender_API::update_magic_links($updating_link_obj, $new_users, false);
 
                     // Save latest updates
-                    Disciple_Tools_Bulk_Magic_Link_Sender_API::update_option_link_obj( $updating_link_obj );
+                    Disciple_Tools_Bulk_Magic_Link_Sender_API::update_option_link_obj($updating_link_obj);
                 }
             }
         }
 
-        if ( isset( $_POST['ml_main_col_delete_form_nonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['ml_main_col_delete_form_nonce'] ) ), 'ml_main_col_delete_form_nonce' ) ) {
-            if ( isset( $_POST['ml_main_col_delete_form_link_obj_id'] ) ) {
+        if (isset($_POST['ml_main_col_delete_form_nonce']) && wp_verify_nonce(sanitize_key(wp_unslash($_POST['ml_main_col_delete_form_nonce'])), 'ml_main_col_delete_form_nonce')) {
+            if (isset($_POST['ml_main_col_delete_form_link_obj_id'])) {
 
                 // Fetch link object id to be deleted
-                $link_obj_id = filter_var( wp_unslash( $_POST['ml_main_col_delete_form_link_obj_id'] ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_NO_ENCODE_QUOTES );
+                $link_obj_id = filter_var(wp_unslash($_POST['ml_main_col_delete_form_link_obj_id']), FILTER_SANITIZE_FULL_SPECIAL_CHARS, FILTER_FLAG_NO_ENCODE_QUOTES);
 
                 // Ensure we have something to work with
-                if ( !empty( $link_obj_id ) ) {
-                    Disciple_Tools_Bulk_Magic_Link_Sender_API::delete_option_link_obj( $link_obj_id );
+                if (!empty($link_obj_id)) {
+                    Disciple_Tools_Bulk_Magic_Link_Sender_API::delete_option_link_obj($link_obj_id);
                 }
             }
         }
     }
 
     public function content() {
-        ?>
+?>
         <div class="wrap">
             <div id="poststuff">
                 <div id="post-body" class="metabox-holder columns-2">
@@ -163,11 +185,11 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 </div><!-- post-body meta box container -->
             </div><!--poststuff end -->
         </div><!-- wrap end -->
-        <?php
+    <?php
     }
 
     public function main_column() {
-        ?>
+    ?>
         <!-- Box -->
         <table class="widefat striped" id="ml_main_col_available_link_objs">
             <thead>
@@ -180,7 +202,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                     <td>
                         Documentation: <a href="https://disciple.tools/user-docs/magic-links/magic-link-scheduling/" target="_blank">
                             Magic Link Scheduling
-                            <img style='height: 20px' class='dt-icon' src="<?php echo esc_html( get_template_directory_uri() . '/dt-assets/images/help.svg' ) ?>" />
+                            <img style='height: 20px' class='dt-icon' src="<?php echo esc_html(get_template_directory_uri() . '/dt-assets/images/help.svg') ?>" />
                         </a>
                     </td>
                 </tr>
@@ -196,10 +218,10 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
 
         <!-- Links Object Deletion -->
         <span style="float:right; margin-bottom: 15px;">
-            <button style="display: none;" type="submit" id="ml_main_col_delete_but" class="button float-right"><?php esc_html_e( 'Delete', 'disciple_tools' ) ?></button>
+            <button style="display: none;" type="submit" id="ml_main_col_delete_but" class="button float-right"><?php esc_html_e('Delete', 'disciple_tools') ?></button>
         </span>
         <form method="post" id="ml_main_col_delete_form">
-            <input type="hidden" id="ml_main_col_delete_form_nonce" name="ml_main_col_delete_form_nonce" value="<?php echo esc_attr( wp_create_nonce( 'ml_main_col_delete_form_nonce' ) ) ?>" />
+            <input type="hidden" id="ml_main_col_delete_form_nonce" name="ml_main_col_delete_form_nonce" value="<?php echo esc_attr(wp_create_nonce('ml_main_col_delete_form_nonce')) ?>" />
 
             <input type="hidden" id="ml_main_col_delete_form_link_obj_id" name="ml_main_col_delete_form_link_obj_id" value="" />
         </form>
@@ -223,7 +245,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 <tr>
                     <td>
                         <span style="float:right;">
-                            <button type="submit" id="ml_main_col_link_objs_manage_update_but" class="button float-right ml-links-update-but"><?php esc_html_e( 'Update', 'disciple_tools' ) ?></button>
+                            <button type="submit" id="ml_main_col_link_objs_manage_update_but" class="button float-right ml-links-update-but"><?php esc_html_e('Update', 'disciple_tools') ?></button>
                         </span>
                     </td>
                 </tr>
@@ -231,6 +253,33 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
         </table>
         <br>
         <!-- End Box -->
+
+        <!-- CUSTOM BRANDING -->
+        <table style="display: none;" class="widefat striped" id="ml_main_col_custom_branding">
+            <thead>
+                <tr>
+                    <td>
+                        Custom Branding
+                    </td>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>
+                        <table class="widefat striped">
+                            <tbody>
+                                <?php $this->custom_brand_enable(); ?>
+                                <?php $this->main_column_custom_branding(); ?>
+                                <?php echo $this->custom_brand_file_upload_form(); ?>
+                                <?php echo $this->custom_brand_display_options(); ?>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table> <!-- e.o CUSTOM BRANDING -->
+        <br>
 
         <!-- Box -->
         <table style="display: none;" class="widefat striped" id="ml_main_col_ml_type_fields">
@@ -250,7 +299,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 <tr>
                     <td>
                         <span style="float:right;">
-                            <button type="submit" id="ml_main_col_ml_type_fields_update_but" class="button float-right ml-links-update-but"><?php esc_html_e( 'Update', 'disciple_tools' ) ?></button>
+                            <button type="submit" id="ml_main_col_ml_type_fields_update_but" class="button float-right ml-links-update-but"><?php esc_html_e('Update', 'disciple_tools') ?></button>
                         </span>
                     </td>
                 </tr>
@@ -278,11 +327,11 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
             <tfoot>
                 <tr>
                     <td>
-                        <button disabled style="min-width: 100%;" type="submit" id="ml_main_col_schedules_send_now_but" class="button float-right"><?php esc_html_e( 'Send Now To All Assigned Users', 'disciple_tools' ) ?></button>
+                        <button disabled style="min-width: 100%;" type="submit" id="ml_main_col_schedules_send_now_but" class="button float-right"><?php esc_html_e('Send Now To All Assigned Users', 'disciple_tools') ?></button>
                     </td>
                     <td>
                         <span style="float:right;">
-                            <button type="submit" id="ml_main_col_assign_users_teams_update_but" class="button float-right ml-links-update-but"><?php esc_html_e( 'Update', 'disciple_tools' ) ?></button>
+                            <button type="submit" id="ml_main_col_assign_users_teams_update_but" class="button float-right ml-links-update-but"><?php esc_html_e('Update', 'disciple_tools') ?></button>
                         </span>
                     </td>
                 </tr>
@@ -309,13 +358,13 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
             <tfoot>
                 <tr>
                     <td>
-                        <button disabled style="max-width: 100%;" type="submit" id="ml_main_col_link_manage_links_but_refresh" class="button float-right"><?php esc_html_e( 'Refresh All Links', 'disciple_tools' ) ?></button>
+                        <button disabled style="max-width: 100%;" type="submit" id="ml_main_col_link_manage_links_but_refresh" class="button float-right"><?php esc_html_e('Refresh All Links', 'disciple_tools') ?></button>
 
-                        <button disabled style="max-width: 100%;" type="submit" id="ml_main_col_link_manage_links_but_delete" class="button float-right"><?php esc_html_e( 'Delete All Links', 'disciple_tools' ) ?></button>
+                        <button disabled style="max-width: 100%;" type="submit" id="ml_main_col_link_manage_links_but_delete" class="button float-right"><?php esc_html_e('Delete All Links', 'disciple_tools') ?></button>
                     </td>
                     <td>
                         <span style="float:right;">
-                            <button type="submit" id="ml_main_col_link_manage_update_but" class="button float-right ml-links-update-but"><?php esc_html_e( 'Update', 'disciple_tools' ) ?></button>
+                            <button type="submit" id="ml_main_col_link_manage_update_but" class="button float-right ml-links-update-but"><?php esc_html_e('Update', 'disciple_tools') ?></button>
                         </span>
                     </td>
                 </tr>
@@ -343,7 +392,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 <tr>
                     <td>
                         <span style="float:right;">
-                            <button type="submit" id="ml_main_col_message_update_but" class="button float-right ml-links-update-but"><?php esc_html_e( 'Update', 'disciple_tools' ) ?></button>
+                            <button type="submit" id="ml_main_col_message_update_but" class="button float-right ml-links-update-but"><?php esc_html_e('Update', 'disciple_tools') ?></button>
                         </span>
                     </td>
                 </tr>
@@ -370,7 +419,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 <tr>
                     <td>
                         <span style="float:right;">
-                            <button type="submit" id="ml_main_col_update_but" class="button float-right ml-links-update-but"><?php esc_html_e( 'Update', 'disciple_tools' ) ?></button>
+                            <button type="submit" id="ml_main_col_update_but" class="button float-right ml-links-update-but"><?php esc_html_e('Update', 'disciple_tools') ?></button>
                         </span>
                     </td>
                 </tr>
@@ -381,17 +430,17 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
 
         <!-- [Submission Form] -->
         <form method="post" id="ml_main_col_update_form">
-            <input type="hidden" id="ml_main_col_update_form_nonce" name="ml_main_col_update_form_nonce" value="<?php echo esc_attr( wp_create_nonce( 'ml_main_col_update_form_nonce' ) ) ?>" />
+            <input type="hidden" id="ml_main_col_update_form_nonce" name="ml_main_col_update_form_nonce" value="<?php echo esc_attr(wp_create_nonce('ml_main_col_update_form_nonce')) ?>" />
 
             <input type="hidden" id="ml_main_col_update_form_link_obj" name="ml_main_col_update_form_link_obj" value="" />
         </form>
 
         <span style="float:left; display: none; font-weight: bold;" id="ml_main_col_update_msg"></span>
-        <?php
+    <?php
     }
 
     public function right_column() {
-        ?>
+    ?>
         <!-- Box -->
         <table style="display: none;" id="ml_links_right_docs_section" class="widefat striped">
             <thead>
@@ -407,23 +456,23 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
         </table>
         <br>
         <!-- End Box -->
-        <?php
+    <?php
 
         // Include helper documentation
         include 'links-tab-docs.php';
     }
 
     private function main_column_available_link_objs() {
-        ?>
+    ?>
         <select style="min-width: 80%;" id="ml_main_col_available_link_objs_select"></select>
         <span style="float:right;">
-            <button id="ml_main_col_available_link_objs_new" type="submit" class="button float-right"><?php esc_html_e( 'New', 'disciple_tools' ) ?></button>
+            <button id="ml_main_col_available_link_objs_new" type="submit" class="button float-right"><?php esc_html_e('New', 'disciple_tools') ?></button>
         </span>
-        <?php
+    <?php
     }
 
     private function main_column_link_objs_manage() {
-        ?>
+    ?>
         <table class="widefat striped">
             <tr>
                 <td style="vertical-align: middle;">Enabled</td>
@@ -456,11 +505,10 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 </td>
             </tr>
         </table>
-        <?php
+    <?php
     }
 
-    private function supported_template_post_types(): array
-    {
+    private function supported_template_post_types(): array {
         return [
             'contacts'
         ];
@@ -468,29 +516,29 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
 
     private function main_column_ml_type_fields() {
         $logo_url = $dt_nav_tabs['admin']['site']['icon'] ?? get_template_directory_uri() . '/dt-assets/images/disciple-tools-logo-white.png';
-        $custom_logo_url = get_option( 'custom_logo_url' );
-        if ( !empty( $custom_logo_url ) ) {
+        $custom_logo_url = get_option('custom_logo_url');
+        if (!empty($custom_logo_url)) {
             $logo_url = $custom_logo_url;
         }
-        ?>
+    ?>
         <table class="widefat striped" id="ml_main_col_ml_type_config_table" style="margin-bottom: 1rem;">
             <tbody>
                 <tr class="display_logo">
                     <input id="ml_main_col_ml_type_config_table_row_field_id" type="hidden" value="display_logo">
-                    <td><?php esc_html_e( 'Display Site Logo', 'disciple_tools' ) ?><img style="height:15px; margin-inline-start: 5px" src="<?php echo esc_html( $logo_url ) ?>" /></td>
+                    <td><?php esc_html_e('Display Site Logo', 'disciple_tools') ?><img style="height:15px; margin-inline-start: 5px" src="<?php echo esc_html($logo_url) ?>" /></td>
                     <td><input id="ml_main_col_ml_type_config_table_row_field_enabled" type="checkbox"></td>
                 </tr>
                 <tr class="enable_connection_fields default_config">
                     <input id="ml_main_col_ml_type_config_table_row_field_id" type="hidden" value="enable_connection_fields">
                     <td>
-                        <?php esc_html_e( 'Enable connection field types', 'disciple_tools' ) ?><br>
-                        <span style="color: grey; font-size: 10px;"><?php esc_html_e( 'This allows listing out all the records (contacts, groups, etc) that the user has access to.', 'disciple_tools' ) ?></span>
+                        <?php esc_html_e('Enable connection field types', 'disciple_tools') ?><br>
+                        <span style="color: grey; font-size: 10px;"><?php esc_html_e('This allows listing out all the records (contacts, groups, etc) that the user has access to.', 'disciple_tools') ?></span>
                     </td>
                     <td><input id="ml_main_col_ml_type_config_table_row_field_enabled" type="checkbox"></td>
                 </tr>
                 <tr class="supports_create">
                     <input id="ml_main_col_ml_type_config_table_row_field_id" type="hidden" value="supports_create">
-                    <td><?php esc_html_e( 'Support creating new items', 'disciple_tools' ) ?></td>
+                    <td><?php esc_html_e('Support creating new items', 'disciple_tools') ?></td>
                     <td><input id="ml_main_col_ml_type_config_table_row_field_enabled" type="checkbox"></td>
                 </tr>
             </tbody>
@@ -508,11 +556,11 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
 
             </tbody>
         </table>
-        <?php
+    <?php
     }
 
     private function main_column_assign_users_teams() {
-        ?>
+    ?>
         <table class="widefat striped">
             <thead>
                 <tr>
@@ -521,7 +569,7 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                     </th>
                     <th>
                         <span style="float:right;">
-                            <button id="ml_main_col_assign_users_teams_add" type="submit" class="button float-right"><?php esc_html_e( 'Add', 'disciple_tools' ) ?></button>
+                            <button id="ml_main_col_assign_users_teams_add" type="submit" class="button float-right"><?php esc_html_e('Add', 'disciple_tools') ?></button>
                         </span>
                     </th>
                 </tr>
@@ -555,11 +603,11 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
             </tbody>
         </table>
 
-        <?php
+    <?php
     }
 
     private function main_column_link_manage() {
-        ?>
+    ?>
         <table class="widefat striped">
             <tr>
                 <td style="vertical-align: middle;">Links Expire Within [<a href="#" class="ml-links-docs" data-title="ml_links_right_docs_links_expire_title" data-content="ml_links_right_docs_links_expire_content">&#63;</a>]
@@ -586,18 +634,18 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 </td>
             </tr>
         </table>
-        <?php
+    <?php
     }
 
     private function main_column_message() {
-        ?>
+    ?>
         <input style="min-width: 100%;" type="text" id="ml_main_col_msg_textarea_subject" value="" placeholder="Message Subject" /><br>
         <textarea style="min-width: 100%;" id="ml_main_col_msg_textarea" rows="10"></textarea>
-        <?php
+    <?php
     }
 
     private function main_column_schedules() {
-        ?>
+    ?>
         <table class="widefat striped">
             <tr>
                 <td style="vertical-align: middle;">Scheduling Enabled</td>
@@ -646,6 +694,85 @@ class Disciple_Tools_Bulk_Magic_Link_Sender_Tab_Links
                 </td>
             </tr>
         </table>
-        <?php
+    <?php
+    }
+
+    public function main_column_custom_branding() {
+    ?>
+        <tr>
+            <td width="150" style="vertical-align: middle;">
+                Brand Name :
+            </td>
+            <td>
+                <input type="text" style="min-width: 10%; width: 100%;" placeholder="Put in your custom branding here. ( Optional )" id="txtCustomBrandName" />
+            </td>
+        </tr>
+    <?php
+    }
+
+    public function custom_brand_enable() {
+        ob_start();
+    ?>
+        <tr>
+            <td width="150" style="vertical-align: middle;">
+                Enable Custom Branding :
+            </td>
+            <td colspan="2">
+                <input type="checkbox" id="chk_EnableCustomBranding" name="chk_EnableCustomBranding" value="" />
+            </td>
+        </tr>
+    <?php
+    }
+
+    public function custom_brand_file_upload_form() {
+        ob_start();
+    ?>
+        <tr>
+            <td width="150" style="vertical-align: middle;">
+                Custom Brand Logo :
+            </td>
+
+            <td>
+                <form id="custom_brand_upload_form" enctype="multipart/form-data" method="post">
+                    <input type="file" id="file" name="file" required />
+                    <input type="submit" id="btn_UploadCustomBrandingIcon" value="Upload File" />
+                </form>
+            </td>
+
+            <td style="text-align: right;">
+            </td>
+        </tr>
+        <tr>
+            <td id="custom_brand_logo_preview">
+            </td>
+
+            <td></td>
+
+            <td style="text-align: right;">
+                <button id="btn_DeleteLogo" class="button" style="display:none;">&times; Delete Logo</button>
+            </td>
+        </tr>
+    <?php
+        return ob_get_clean();
+    }
+
+    public function custom_brand_display_options() {
+        ob_start();
+    ?>
+        <tr>
+            <td width="150" style="vertical-align: middle;">
+                Display Options
+            </td>
+
+            <td colspan="2">
+                <input type="checkbox" id="chk_DisplayIcon" name="chk_DisplayIcon" value="" />
+                <label for="chk_DisplayIcon">Display Icon</label> &nbsp;&nbsp;
+                <input type="checkbox" id="chk_DisplayName" name="chk_DisplayName" value="" />
+                <label for="chk_DisplayName">Display Name</label>
+            </td>
+
+        </tr>
+<?php
+        return ob_get_clean();
     }
 }

@@ -325,7 +325,23 @@ abstract class Disciple_Tools_Magic_Links_Magic_User_Posts_Base extends DT_Magic
                                         ]
                                     ]
                                 ],
+
+                                'page_title' => $this->page_title,
+
+                                // Venture Custom --
+                                // sort order
                                 'magic_link_fields_sort_order' => Disciple_Tools_Bulk_Magic_Link_Sender_API::magic_link_fields_sort_order(),
+
+                                // custom branding
+                                'magic_link_custom_branding'                        => Disciple_Tools_Bulk_Magic_Link_Sender_API::magic_link_custom_branding(),
+
+                                // custom branding icon
+                                'dt_endpoint_get_custom_branding_icon'              => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_get_custom_branding_icon(),
+
+                                // custom branding display options
+                                'dt_endpoint_save_custom_branding_display_options'  => Disciple_Tools_Bulk_Magic_Link_Sender_API::fetch_endpoint_save_custom_branding_display_options(),
+
+                                // e.o Venture Custom --
 
                             ]) ?>][0];
 
@@ -966,6 +982,88 @@ abstract class Disciple_Tools_Magic_Links_Magic_User_Posts_Base extends DT_Magic
                         shown: false
                     }
                 },
+
+                customBranding: {
+
+                    // Render Custom Branding Section
+                    render(data) {
+                        if (data.enable) {
+
+                            // setting document title
+                            document.title = `${data.name} - Disciple Tools Venture : ${jsObject.page_title}`
+
+                            if (data.display_options) {
+                                // variable prepping
+                                const options = JSON.parse(data.display_options)
+
+                                const el = {
+                                    wrap: jQuery('#wrapCustomBranding'),
+                                    icon: jQuery('<div />'),
+                                    name: jQuery('<div />')
+                                }
+
+                                // if icon option enabled
+                                if (options.icon && data.icon) {
+                                    // rendering icon
+                                    el.icon.append(`<img src="${data.icon}" style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid #3f729b;" />`)
+                                    el.wrap.append(el.icon)
+
+                                    // Updating favicon
+                                    $('link[rel="shortcut icon"]').remove()
+                                    $('link[rel="icon"]').remove()
+
+                                    let link = document.createElement('link');
+                                    link.rel = 'icon';
+                                    link.href = data.icon;
+                                    document.head.appendChild(link);
+                                }
+
+                                // if name option enabled
+                                if (options.name) {
+                                    el.name.append(`<h3>${data.name}</h3>`)
+                                    el.wrap.append(el.name)
+                                }
+                            }
+                        }
+                    },
+
+                    get: {
+                        customBranding() {
+                            const payload = {
+                                action: 'get',
+                                parts: jsObject.parts,
+                                // lang: jsObject.lang,
+                                sys_type: jsObject.sys_type,
+                                ml_id: jsObject.link_obj_id.id,
+                                ts: moment().unix()
+                            }
+
+                            jQuery.ajax({
+                                    type: "GET",
+                                    data: {
+                                        ...payload
+                                    },
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    url: jsObject.root + jsObject.parts.root + '/v1/' + jsObject.parts.type + '/get-magic-link-custom-branding',
+                                    beforeSend: function(xhr) {
+                                        xhr.setRequestHeader('X-WP-Nonce', jsObject.nonce);
+                                        xhr.setRequestHeader('Cache-Control', 'no-store');
+                                    }
+                                })
+                                .done(function(data) {
+                                    window.fns.customBranding.render(data)
+                                })
+                                .fail(function(e) {
+                                    console.log(e)
+                                    jQuery('#error').html(e)
+                                })
+                        }
+
+                    },
+
+
+                }
             }
 
             $('#txtSearch').on('keypress', function(e) {
@@ -975,7 +1073,8 @@ abstract class Disciple_Tools_Magic_Links_Magic_User_Posts_Base extends DT_Magic
                 }
             });
 
-            console.log(jsObject)
+            // console.log(jsObject)
+            window.fns.customBranding.get.customBranding()
         </script>
     <?php
         return true;
@@ -996,6 +1095,9 @@ abstract class Disciple_Tools_Magic_Links_Magic_User_Posts_Base extends DT_Magic
         <div id="custom-style"></div>
         <div id="wrapper">
             <header>
+                <div id="wrapCustomBranding" style="text-align: center;">
+                </div>
+
                 <?php if ($display_logo) : ?>
                     <img src="<?php echo esc_attr($logo_url) ?>" class="logo" />
                 <?php endif; ?>
@@ -1495,6 +1597,28 @@ abstract class Disciple_Tools_Magic_Links_Magic_User_Posts_Base extends DT_Magic
                 ],
             ]
         );
+
+        register_rest_route(
+            $namespace,
+            '/' . $this->type . '/get-magic-link-custom-branding',
+            [
+                [
+                    'methods'             => 'GET',
+                    'callback'            => [$this, 'get_magic_link_custom_branding'],
+                    'permission_callback' => function (WP_REST_Request $request) {
+                        $magic = new DT_Magic_URL($this->root);
+
+                        /**
+                         * Adjust global values accordingly, so as to accommodate both wp_user
+                         * and post requests.
+                         */
+                        $this->adjust_global_values_by_incoming_sys_type($request->get_params()['sys_type']);
+
+                        return $magic->verify_rest_endpoint_permissions_on_post($request);
+                    },
+                ],
+            ]
+        );
     }
 
     public function endpoint_get(WP_REST_Request $request) {
@@ -1904,5 +2028,40 @@ abstract class Disciple_Tools_Magic_Links_Magic_User_Posts_Base extends DT_Magic
                 wp_set_current_user($user_id);
                 break;
         }
+    }
+
+    public function get_magic_link_custom_branding(WP_REST_Request $request) {
+        $params = $request->get_params();
+
+        if (!isset($params['parts'], $params['sys_type'])) {
+            return new WP_Error(__METHOD__, 'Missing parameters', ['status' => 400]);
+        }
+
+        // Update logged-in user state if required accordingly, based on their sys_type
+        if (!is_user_logged_in()) {
+            $this->update_user_logged_in_state($params['sys_type'], $params['parts']['post_id']);
+        }
+
+        $ml_id = $request->get_params()['ml_id'];
+        $cm = 'magic_link_custom_branding_';
+
+        $option_names = [
+            'icon'              => $cm . 'icon' . $ml_id,
+            'display_options'   => $cm . 'display_options' . $ml_id,
+            'enable'            => $cm . 'enable' . $ml_id,
+            'name'              => $cm . 'name' . $ml_id,
+        ];
+
+        $enable = get_option($option_names['enable']);
+        $name = get_option($option_names['name']);
+        $icon = get_option($option_names['icon']);
+        $display_options = get_option($option_names['display_options']);
+
+        return new WP_REST_Response([
+            'enable'            => $enable,
+            'name'              => $name,
+            'icon'              => $icon,
+            'display_options'   => $display_options,
+        ], 200);
     }
 }

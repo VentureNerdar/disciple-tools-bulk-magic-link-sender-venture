@@ -10,6 +10,19 @@ jQuery(function ($) {
     });
   });
 
+  // Data Structures VENTURE CUSTOM
+  window.d = {
+    customBranding: {
+      name: null,
+      brandIconURL: null,
+      enable: false,
+      displayOptions: {
+        icon: false,
+        name: false,
+      }
+    }
+  }
+
   // Event Listeners
   $(document).on('click', '#ml_main_col_available_link_objs_new', function () {
     handle_new_link_obj_request();
@@ -39,6 +52,7 @@ jQuery(function ($) {
 
   $(document).on('change', '#ml_main_col_available_link_objs_select', function () {
     handle_load_link_obj_request();
+    handleLoadCustomBranding()
   });
 
   $(document).on('click', '#ml_main_col_link_objs_manage_expires_never', function () {
@@ -619,6 +633,10 @@ jQuery(function ($) {
   }
 
   // NERDAR CHANGES
+  $(document).ready(function () {
+    const customBranding = window.dt_magic_links.magic_link_custom_branding 
+  })
+
   // added sort key
   function build_magic_link_type_field_html(type_key, id, label, field_type, sort_key = 0) {
     return `<tr class="ui-state-default">
@@ -674,6 +692,341 @@ jQuery(function ($) {
     })
     .disableSelection();
   }
+
+  // on custom branding name button change and blurred ( focus out )
+  $(document).on('blur', '#txtCustomBrandName', function () {
+    saveCustomBrandingName()
+  });
+
+  function handleLoadCustomBranding() {
+    $('#ml_main_col_custom_branding').show();
+
+    getCustomBrandingEnable()
+    getCustomBrandingName()
+    getCustomBrandingDisplayOptions()
+    getCustomBrandingIconURL()
+
+    initCustomBrandingDisplayOptionCheckbox()
+    initCustomBrandingEnableCheckbox()
+    initCustomBrandingUploadForm()
+  }
+
+  // Icon
+  function initCustomBrandingUploadForm() {
+    $('#custom_brand_upload_form').on('submit', function(e) {
+      e.preventDefault();
+      let linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+
+      var file_data = $('#file').prop('files')[0];
+      var formData = new FormData();
+      formData.append('ml_id', linkObject.id)
+      formData.append('file', file_data);
+      formData.append('action', 'custom_file_upload');
+
+      // need to setup custom branding upload url
+      const url = window.dt_magic_links.dt_endpoint_handle_upload_custom_branding_icon
+
+      $.ajax({
+        url,
+        type: 'POST',
+        contentType: false,
+        processData: false,
+        data: formData,
+        beforeSend: (xhr) => {
+          xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+        },
+        success: function(response) {
+          getCustomBrandingIconURL()
+        },
+        error: function (data) {
+          console.error(data)
+        }
+      });
+    });
+  }
+
+  function getCustomBrandingIconURL() {
+    
+    let linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_get_custom_branding_icon,
+      method: 'GET',
+      data: {
+        ml_id: linkObject.id
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+      },
+      success: function (data) {
+        const el = {
+          preview: $('#custom_brand_logo_preview'),
+          delete: $('#btn_DeleteLogo')
+        }
+
+        if(data.icon_url) {
+          el.preview.html(`
+            <div style="height: 40px; display: flex; align-items: center;">
+              <span style="display: inline-block; height: 40px; line-height: 40px;">Preview</span>
+              <img src="${data.icon_url}" style="width: 40px; height: 40px;"/>
+            </div>
+          `)
+
+          el.delete.show()
+
+          el.delete.click(() => {
+            deleteCustomBrandingIcon()
+          }) 
+        } else {
+          el.preview.html('No logo uploaded')
+          el.delete.hide()
+        }
+      },
+      error: function (data) {
+        console.error(data)
+      }
+    });
+  }
+
+  function deleteCustomBrandingIcon() {
+    let linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_delete_custom_branding_icon,
+      method: 'POST',
+      data: {
+        ml_id: linkObject.id
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+      },
+      success: function (data) {
+        console.log(data)
+        getCustomBrandingIconURL()
+      },
+      error: function (data) {
+        console.error(data)
+      }
+    });
+  }
+
+  // Display Options
+  function initCustomBrandingDisplayOptionCheckbox() {
+    $('#chk_DisplayIcon').change(() => {
+      window.d.customBranding.displayOptions.icon = $('#chk_DisplayIcon').is(':checked')
+      updateCustomBrandingDisplayOptions()
+    })
+
+    $('#chk_DisplayName').change(() => {
+      window.d.customBranding.displayOptions.name = $('#chk_DisplayName').is(':checked')
+      updateCustomBrandingDisplayOptions()
+    })
+  }
+
+  function updateCustomBrandingDisplayOptions() {
+    let linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_save_custom_branding_display_options,
+      method: 'POST',
+      data: {
+        ml_id: linkObject.id,
+        display_options: JSON.stringify(window.d.customBranding.displayOptions)
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+        savingCustomBrandingDisplayOptionsProgress()
+      },
+      success: (data) => {
+        console.log('Success saving custom branding display options')
+        console.log(data)
+        savingCustomBrandingDisplayOptionsProgress(false)
+      },
+      error: (data) => {
+        console.log(data)
+      }
+    });
+  }
+
+  function savingCustomBrandingDisplayOptionsProgress(start = true) {
+    $('#chk_DisplayIcon').prop('disabled', start)
+    $('#chk_DisplayName').prop('disabled', start)
+  }
+
+  function getCustomBrandingDisplayOptions() {
+    let linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+    
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_get_custom_branding_display_options,
+      method: 'GET',
+      data: {
+        ml_id: linkObject.id
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+      },
+      success: function (data) {
+        const options = JSON.parse(data.branding_options)
+
+        if(options.icon) {
+          $('#chk_DisplayIcon').prop('checked', true)
+        }
+
+        if(options.name) {
+          $('#chk_DisplayName').prop('checked', true)
+        }
+      },
+      error: function (data) {
+        console.error(data)
+      }
+    });
+  }
+
+  // : enable
+  function getCustomBrandingEnable() {
+    let linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+    
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_get_custom_branding_enable,
+      method: 'GET',
+      data: {
+        ml_id: linkObject.id
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+      },
+      success: function (data) {
+        let enabled = false
+
+        if(data.branding !== false) {
+          enabled = JSON.parse(data.branding_enable)
+        }
+
+        if(enabled) {
+          $('#chk_EnableCustomBranding').prop('checked', true)
+        } else {
+          $('#chk_EnableCustomBranding').prop('checked', false)
+        }
+
+        checkEnabled()
+      },
+      error: function (data) {
+        console.error(data)
+      }
+    });
+  }
+
+  function initCustomBrandingEnableCheckbox() {
+    $('#chk_EnableCustomBranding').change(() => {
+      window.d.customBranding.enable = $('#chk_EnableCustomBranding').is(':checked')
+      updateCustomBrandingEnable()
+      checkEnabled()
+    })
+  }
+
+  function updateCustomBrandingEnable() {
+    let linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_save_custom_branding_enable,
+      method: 'POST',
+      data: {
+        ml_id: linkObject.id,
+        enable: JSON.stringify($('#chk_EnableCustomBranding').is(':checked'))
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+        savingCustomBrandingEnableProgress()
+      },
+      success: (data) => {
+        console.log('Success saving custom branding enable')
+        console.log(data)
+        savingCustomBrandingEnableProgress(false)
+      },
+      error: (data) => {
+        console.log(data)
+      }
+    });
+  }
+
+  function savingCustomBrandingEnableProgress(start = true) {
+    $('#chk_EnableCustomBranding').prop('disabled', start)
+  }
+
+  function checkEnabled() {
+    const enabled = $('#chk_EnableCustomBranding').is(':checked')
+
+    if(enabled) {
+      $('#txtCustomBrandName').prop('disabled', false)
+      $('#chk_DisplayIcon').prop('disabled', false)
+      $('#chk_DisplayName').prop('disabled', false)
+      $('#file').prop('disabled', false)
+      $('#btn_UploadCustomBrandingIcon').prop('disabled', false)
+      $('#btn_DeleteLogo').prop('disabled', false)
+    } else {
+      $('#txtCustomBrandName').prop('disabled', true)
+      $('#chk_DisplayIcon').prop('disabled', true)
+      $('#chk_DisplayName').prop('disabled', true)
+      $('#file').prop('disabled', true)
+      $('#btn_UploadCustomBrandingIcon').prop('disabled', true)
+      $('#btn_DeleteLogo').prop('disabled', true)
+    }
+  }
+
+  // : name
+  function getCustomBrandingName() {
+    const linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_get_custom_branding_name,
+      method: 'GET',
+      data: {
+        ml_id: linkObject.id
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+        $('#txtCustomBrandName').prop('disabled', true)
+      },
+      success: function (data) {
+        console.log(data)
+        d.customBranding.name = data.branding_name === false ? '' : data.branding_name        // saving for default value
+        $('#txtCustomBrandName').val(data.branding_name === false ? '' : data.branding_name)  // update to text field
+      },
+      error: function (data) {
+        console.error(data)
+      },
+      completed: () => {
+        $('#txtCustomBrandName').prop('disabled', false)
+      }
+    });
+  }
+
+  function saveCustomBrandingName() {
+    if($('#txtCustomBrandName').val() === d.customBranding.name) {
+      return
+    }
+    
+    const linkObject = fetch_link_obj($('#ml_main_col_available_link_objs_select').val()); // get link obj to get its ID
+
+    $.ajax({
+      url: window.dt_magic_links.dt_endpoint_save_custom_branding_name,
+      method: 'POST',
+      data: {
+        ml_id: linkObject.id,
+        name: $('#txtCustomBrandName').val()
+      },
+      beforeSend: (xhr) => {
+        xhr.setRequestHeader("X-WP-Nonce", window.dt_admin_scripts.nonce);
+      },
+      success: function (data) {
+        console.log(data)
+      },
+      error: function (data) {
+        console.error(data)
+      }
+    });
+  }
+
+  // e.o NERDAR CHANGES
 
   function display_magic_link_type_fields() {
     let fields_table = $('#ml_main_col_ml_type_fields_table');

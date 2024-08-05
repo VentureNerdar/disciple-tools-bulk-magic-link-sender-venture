@@ -247,6 +247,9 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
                                 'translations'            => [
                                     'update_success' => __('Thank you for your successful submission. You may return to the form and re-submit if changes are needed.', 'disciple-tools-bulk-magic-link-sender')
                                 ],
+
+                                'page_title' => $this->page_title,
+
                                 'magic_link_fields_sort_order' => Disciple_Tools_Bulk_Magic_Link_Sender_API::magic_link_fields_sort_order(),
                                 'field_settings' => DT_Posts::get_post_field_settings('contacts', false)
 
@@ -268,11 +271,14 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
                                 foreach ($type_sort_order[0]->sort_order as $sort) {
 
                                     $id = $sort->id;
-                                    $type_sort_order[0]->sort_order[$sort->id] = $field_settings[$id]['name'];
+                                    if (isset($field_settings[$id])) {
+                                        $field_setting = $field_settings[$id];
+                                        $sort->name = $field_setting['name'];
 
-                                    $sort->name = $field_settings[$id]['name'];
-
-                                    array_push($sorted_fields, $sort);
+                                        array_push($sorted_fields, [
+                                            $sort
+                                        ]);
+                                    }
                                 }
 
                                 echo json_encode([$sorted_fields]);
@@ -284,16 +290,15 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
 
                 const table = $('.form-content-table tbody')
 
-                console.log(table.length)
-
                 linkFields[0].forEach(lf => {
+                    const l = lf[0]
                     const ids = {
-                        row: 'form_content_' + lf.id + '_tr',
-                        td: 'form_content_' + lf.id + '_td'
+                        row: 'form_content_' + l.id + '_tr',
+                        td: 'form_content_' + l.id + '_td'
                     }
 
                     const htmls = {
-                        label: '<td style="vertical-align: top;"<b>' + lf.name + '</b></td>',
+                        label: '<td style="vertical-align: top;"<b>' + l.name + '</b></td>',
                         field: `<td id="${ ids.td}"></td>`,
                         row: $('<tr>', {
                             id: ids.row
@@ -756,6 +761,85 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
                         shown: false
                     }
                 },
+
+                customBranding: {
+                    handle: {
+                        render: (data) => {
+
+                            if (data.enable) {
+
+                                // setting document title
+                                document.title = `${data.name} - Disciple Tools Venture : ${jsObject.page_title}`
+
+                                if (data.display_options) {
+                                    // variable prepping
+                                    const options = JSON.parse(data.display_options)
+
+                                    const el = {
+                                        wrap: jQuery('#wrapCustomBranding'),
+                                        icon: jQuery('<div />'),
+                                        name: jQuery('<div />')
+                                    }
+
+                                    // if icon option enabled
+                                    if (options.icon && data.icon) {
+                                        // rendering icon
+                                        el.icon.append(`<img src="${data.icon}" style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid #3f729b;" />`)
+                                        el.wrap.append(el.icon)
+
+                                        // Updating favicon
+                                        $('link[rel="shortcut icon"]').remove()
+                                        $('link[rel="icon"]').remove()
+
+                                        let link = document.createElement('link');
+                                        link.rel = 'icon';
+                                        link.href = data.icon;
+                                        document.head.appendChild(link);
+                                    }
+
+                                    // if name option enabled
+                                    if (options.name) {
+                                        el.name.append(`<h3>${data.name}</h3>`)
+                                        el.wrap.append(el.name)
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    api: {
+                        get: () => {
+                            const payload = {
+                                action: 'get',
+                                parts: jsObject.parts,
+                                // lang: jsObject.lang,
+                                sys_type: jsObject.sys_type,
+                                ml_id: jsObject.link_obj_id.id,
+                                ts: moment().unix()
+                            }
+
+                            jQuery.ajax({
+                                    type: "GET",
+                                    data: {
+                                        ...payload
+                                    },
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "json",
+                                    url: jsObject.root + jsObject.parts.root + '/v1/' + jsObject.parts.type + '/get-magic-link-custom-branding',
+                                    beforeSend: function(xhr) {
+                                        xhr.setRequestHeader('X-WP-Nonce', jsObject.nonce);
+                                        xhr.setRequestHeader('Cache-Control', 'no-store');
+                                    }
+                                })
+                                .done(function(data) {
+                                    window.fns.customBranding.handle.render(data)
+                                })
+                                .fail(function(e) {
+                                    console.log(e)
+                                    jQuery('#error').html(e)
+                                })
+                        }
+                    }
+                }
             }
 
             $('#txtSearch').on('keypress', function(e) {
@@ -763,6 +847,8 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
                     window.get_magic($('#txtSearch').val())
                 }
             });
+
+            window.fns.customBranding.api.get()
         </script>
     <?php
         return true;
@@ -776,8 +862,11 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
     ?>
         <div id="custom-style"></div>
         <div id="wrapper">
+            <!-- Custom Branding -->
+
             <div class="grid-x">
                 <div class="cell center">
+                    <div id="wrapCustomBranding" style="text-align: center;"></div>
                     <h2 id="title"><b><?php esc_html_e('Updates Needed', 'disciple_tools') ?></b></h2>
                 </div>
             </div>
@@ -940,6 +1029,28 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
                 [
                     'methods'             => 'GET',
                     'callback'            => [$this, 'update_record'],
+                    'permission_callback' => function (WP_REST_Request $request) {
+                        $magic = new DT_Magic_URL($this->root);
+
+                        /**
+                         * Adjust global values accordingly, so as to accommodate both wp_user
+                         * and post requests.
+                         */
+                        $this->adjust_global_values_by_incoming_sys_type($request->get_params()['sys_type']);
+
+                        return $magic->verify_rest_endpoint_permissions_on_post($request);
+                    },
+                ],
+            ]
+        );
+
+        register_rest_route(
+            $namespace,
+            '/' . $this->type . '/get-magic-link-custom-branding',
+            [
+                [
+                    'methods'             => 'GET',
+                    'callback'            => [$this, 'get_magic_link_custom_branding'],
                     'permission_callback' => function (WP_REST_Request $request) {
                         $magic = new DT_Magic_URL($this->root);
 
@@ -1154,6 +1265,41 @@ class Disciple_Tools_Magic_Links_Magic_User_App extends DT_Magic_Url_Base {
                 wp_set_current_user($user_id);
                 break;
         }
+    }
+
+    public function get_magic_link_custom_branding(WP_REST_Request $request) {
+        $params = $request->get_params();
+
+        if (!isset($params['parts'], $params['sys_type'])) {
+            return new WP_Error(__METHOD__, 'Missing parameters', ['status' => 400]);
+        }
+
+        // Update logged-in user state if required accordingly, based on their sys_type
+        if (!is_user_logged_in()) {
+            $this->update_user_logged_in_state($params['sys_type'], $params['parts']['post_id']);
+        }
+
+        $ml_id = $request->get_params()['ml_id'];
+        $cm = 'magic_link_custom_branding_';
+
+        $option_names = [
+            'icon'              => $cm . 'icon' . $ml_id,
+            'display_options'   => $cm . 'display_options' . $ml_id,
+            'enable'            => $cm . 'enable' . $ml_id,
+            'name'              => $cm . 'name' . $ml_id,
+        ];
+
+        $enable = get_option($option_names['enable']);
+        $name = get_option($option_names['name']);
+        $icon = get_option($option_names['icon']);
+        $display_options = get_option($option_names['display_options']);
+
+        return new WP_REST_Response([
+            'enable'            => $enable,
+            'name'              => $name,
+            'icon'              => $icon,
+            'display_options'   => $display_options,
+        ], 200);
     }
 }
 
