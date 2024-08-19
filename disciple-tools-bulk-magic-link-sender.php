@@ -6,7 +6,7 @@
  * Description: Disciple Tools - Magic Links for users, contacts, groups and teams assignment + schedule management for magic links dispatching over configured sending channels.
  * Text Domain: disciple-tools-bulk-magic-link-sender
  * Domain Path: /languages
- * Version:  1.24.0
+ * Version:  1.25.0
  * Author URI: https://github.com/VentureNerdar
  * GitHub Plugin URI: https://github.com/VentureNerdar/disciple-tools-bulk-magic-link-sender-venture
  * Requires at least: 4.7.0
