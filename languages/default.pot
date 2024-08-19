@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Disciple Tools - Magic Links plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: Disciple Tools - Magic Links 1.23.0\n"
+"Project-Id-Version: Disciple Tools - Magic Links 1.25.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/disciple-tools-bulk-magic-link-sender\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
